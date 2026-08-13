@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: camelsvsdwarfs
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:camelsvsdwarfsdb}
+    username: ${DB_USERNAME:camelsvsdwarfsuser}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

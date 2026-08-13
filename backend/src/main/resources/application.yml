@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: enanosvscamellos
+
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/enanosdb
+    username: enanosuser
+    password: enanospassword
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
