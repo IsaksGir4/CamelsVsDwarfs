@@ -19,10 +19,10 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idPlayer;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
