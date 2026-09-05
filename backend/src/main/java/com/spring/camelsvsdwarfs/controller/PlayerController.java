@@ -26,6 +26,8 @@ import java.util.UUID;
 public class PlayerController {
     private final PlayerService playerService;
 
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PlayerResponseDTO> create(@Valid @RequestBody PlayerCreateDTO dto) {
         PlayerResponseDTO created = playerService.create(dto);
         return ResponseEntity
@@ -67,7 +69,7 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.changeStatus(id,dto));
     }
 
-    @PatchMapping("/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete (@PathVariable UUID id){
