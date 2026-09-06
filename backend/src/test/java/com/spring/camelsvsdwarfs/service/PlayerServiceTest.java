@@ -105,13 +105,17 @@ public class PlayerServiceTest {
                 "Medellin"
         );
 
+        LocalDate before = LocalDate.now();
+
         when(playerRepository.existsByNickname("NullP")).thenReturn(false);
         when(playerRepository.save(any(Player.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         PlayerResponseDTO result = playerService.create(dto);
 
+        LocalDate after = LocalDate.now();
+
         assertThat(result.actualState()).isEqualTo(PlayerState.ACTIVE);
-        assertThat(result.registerDate()).isEqualTo(LocalDate.now());
+        assertThat(result.registerDate()).isBetween(before, after);
         assertThat(result.victories()).isZero();
         assertThat(result.defeats()).isZero();
         assertThat(result.racesCompleted()).isZero();
