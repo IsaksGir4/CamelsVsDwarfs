@@ -16,9 +16,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -143,6 +149,20 @@ public class PlayerServiceTest {
         assertThat(result.nickname()).isEqualTo("ByteTheCamel");
     }
 
+    @Test
+    void findAll_conFiltrosYPaginacion_retornaDTOsYUsaRepositoryFindAll() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Player> page = new PageImpl<>(List.of(existingPlayer), pageable, 1);
+        when(playerRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+
+        Page<PlayerResponseDTO> result = playerService.findAll(PlayerType.CAMEL, PlayerState.ACTIVE, "Byte", pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().nickname()).isEqualTo("ByteTheCamel");
+        verify(playerRepository).findAll(any(Specification.class), eq(pageable));
+    }
+
     //---------------------- UPDATE ---------------------
 
     @Test
@@ -211,7 +231,7 @@ public class PlayerServiceTest {
     // ---------- DELETE ----------
 
     @Test
-    void delete_sinCarerrasCompletadas_eliminaCorrectamente() {
+    void delete_sinCarrerasCompletadas_eliminaCorrectamente() {
         existingPlayer.setRacesCompleted(0);
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
 
