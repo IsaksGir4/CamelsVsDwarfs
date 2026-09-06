@@ -5,7 +5,11 @@ import com.spring.camelsvsdwarfs.entity.PlayerState;
 import com.spring.camelsvsdwarfs.entity.PlayerType;
 import org.springframework.data.jpa.domain.Specification;
 
-public class PlayerSpecification {
+public final class PlayerSpecification {
+
+    private PlayerSpecification() {
+        // Evita instanciacion: clase utilitaria de solo metodos estaticos
+    }
 
     public static Specification<Player> hasType(PlayerType playerType){
         return (root, query, cb) -> playerType ==null?null:cb.equal(root.get("playerType"), playerType);

@@ -186,7 +186,7 @@ public class PlayerServiceTest {
     // ---------- CHANGE STATUS ----------
 
     @Test
-    void changeStatus_alMismoEstadoActual_lanzaCOnflictException() {
+    void changeStatus_alMismoEstadoActual_lanzaConflictException() {
         PlayerStatusUpdateDTO dto = new PlayerStatusUpdateDTO(PlayerState.ACTIVE);
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
 
@@ -211,7 +211,7 @@ public class PlayerServiceTest {
     // ---------- DELETE ----------
 
     @Test
-    void delete_sinCarerrasCOmpletadas_eliminaCorrectamente() {
+    void delete_sinCarerrasCompletadas_eliminaCorrectamente() {
         existingPlayer.setRacesCompleted(0);
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
 

@@ -97,11 +97,7 @@ public class PlayerService {
 
         if (current == next){
             throw  new ConflictException("El competidor ya se encuentra en estado " + next);
-        }
-//        else if (current == PlayerState.RETIRED){
-//            throw new ConflictException("Un competidor retirado no puede cambiar de estado");
-//        }
-       else {
+        }else {
             player.setActualState(next);
         }
         Player updated = playerRepository.save(player);
