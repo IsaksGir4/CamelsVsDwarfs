@@ -1,4 +1,4 @@
-package com.spring.camelsvsdwarfs.service;
+package com.spring.camelsvsdwarfs.repository.specification;
 
 import com.spring.camelsvsdwarfs.entity.Player;
 import com.spring.camelsvsdwarfs.entity.PlayerState;

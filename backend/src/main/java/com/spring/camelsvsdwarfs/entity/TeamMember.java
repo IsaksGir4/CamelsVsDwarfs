@@ -1,14 +1,6 @@
 package com.spring.camelsvsdwarfs.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -32,13 +24,17 @@ public class TeamMember {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_player", nullable = false)
-    private Player competitor;
+    private Player player;
 
+    @Column(nullable = false)
     private LocalDate joinDate;
+
+    @Column
     private LocalDate leaveDate;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status="ACTIVE";
+    private TeamMemberStatus status = TeamMemberStatus.ACTIVE;
 
 }
