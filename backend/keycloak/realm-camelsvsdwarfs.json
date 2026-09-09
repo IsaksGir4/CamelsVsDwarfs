@@ -24,7 +24,7 @@
       "redirectUris": ["http://localhost:8080/*"],
       "webOrigins": ["http://localhost:8080"],
       "attributes": { "pkce.code.challenge.method": "S256" },
-      "defaultClientScopes": ["web-origins", "profile", "roles", "email"]
+      "defaultClientScopes": ["web-origins", "profile", "roles", "email", "basic"]
     }
   ],
   "users": [
