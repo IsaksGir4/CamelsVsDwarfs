@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### ENVIRONMENT ###
-.env
+.envapp-logs.txt
