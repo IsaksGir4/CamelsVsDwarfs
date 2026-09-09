@@ -7,7 +7,7 @@
   "roles": {
     "realm": [
       { "name": "admin", "description": "Manages users, competitors, teams, races, registrations, results and audit records" },
-      { "name": "race_organizer", "description": "Manages races, registrations and results; views competitors and teams" },
+      { "name": "organizer", "description": "Manages races, registrations and results; views competitors and teams" },
       { "name": "viewer", "description": "Read-only: public info, schedules, results and standings" }
     ]
   },
@@ -46,7 +46,7 @@
       "lastName": "Organizer",
       "email": "organizer@camelsvsdwarfs.test",
       "credentials": [{ "type": "password", "value": "organizer123", "temporary": false }],
-      "realmRoles": ["race_organizer"]
+      "realmRoles": ["organizer"]
     },
     {
       "username": "viewer",
