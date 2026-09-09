@@ -31,8 +31,9 @@ public class RegisterPlayer {
     @JoinColumn(name="id_team")
     private Team team;
 
-    @Column(name = "id_user",nullable = false, length = 100)
-    private String registeringUsername;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_user", nullable = false)
+    private User registeringUser;
 
     @Builder.Default
     @Column(nullable = false)

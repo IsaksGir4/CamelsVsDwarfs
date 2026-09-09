@@ -19,8 +19,9 @@ public class Race {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idRace;
 
-    @Column(name = "id_organizer", nullable = false, length = 100)
-    private String organizerUsername;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_organizer", nullable = false)
+    private User organizer;
 
     @Column(nullable = false, length = 100)
     private String raceName;
