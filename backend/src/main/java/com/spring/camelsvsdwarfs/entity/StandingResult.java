@@ -33,9 +33,8 @@ public class StandingResult {
     @JoinColumn(name = "id_team")
     private Team team;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_user", nullable = false)
-    private User user;
+    @Column(name = "id_user", nullable = false, length = 100)
+    private String username;
 
     private Integer startPosition;
     private Integer endPosition;
