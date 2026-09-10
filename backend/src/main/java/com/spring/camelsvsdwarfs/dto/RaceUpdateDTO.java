@@ -6,7 +6,7 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record RaceCreateDTO(
+public record RaceUpdateDTO(
         @NotBlank(message = "El nombre de la carrera no puede estar vacio")
         @Size(min = 3, max = 100, message = "Entre 3 y 100 caracteres")
         String raceName,
@@ -15,7 +15,6 @@ public record RaceCreateDTO(
         String description,
 
         @NotNull(message = "La fecha programada es obligatoria")
-        @FutureOrPresent(message = "La carrera no puede programarse en el pasado")
         LocalDate programationDate,
 
         @NotNull(message = "La hora programada es obligatoria")
