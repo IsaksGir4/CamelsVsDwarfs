@@ -10,6 +10,10 @@ import com.spring.camelsvsdwarfs.entity.PlayerType;
 import com.spring.camelsvsdwarfs.exception.ConflictException;
 import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.PlayerRepository;
+<<<<<<< HEAD
+=======
+import com.spring.camelsvsdwarfs.repository.specification.PlayerSpecification;
+>>>>>>> feature/players
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -94,12 +98,11 @@ public class PlayerService {
         Player player = findEntityById(id);
         PlayerState current = player.getActualState();
         PlayerState next = dto.newState();
-
-        if (current == next){
-            throw  new ConflictException("El competidor ya se encuentra en estado " + next);
-        }else {
-            player.setActualState(next);
+        if (current == next) {
+            throw new ConflictException("El competidor ya se encuentra en estado " + next);
         }
+        player.setActualState(next);
+
         Player updated = playerRepository.save(player);
         return toResponseDTO(updated);
     }
