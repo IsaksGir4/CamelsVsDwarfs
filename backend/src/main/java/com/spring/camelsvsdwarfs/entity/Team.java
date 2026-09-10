@@ -31,7 +31,12 @@ public class Team {
     @Column(nullable = false)
     private TeamStatus status;
 
-    private String responsibleCoach;
+    @Column(name = "responsable_coach")
+    private String responsableCoach;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TeamCategory category;
 
     @Builder.Default
     @Column(nullable = false)

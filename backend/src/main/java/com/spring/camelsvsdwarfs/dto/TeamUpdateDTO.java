@@ -1,11 +1,12 @@
 package com.spring.camelsvsdwarfs.dto;
 
 import com.spring.camelsvsdwarfs.entity.TeamCategory;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record TeamCreateDTO(
+public record TeamUpdateDTO(
         @NotBlank(message = "El nombre del equipo no puede estar vacio")
         @Size(min = 3, max = 100, message = "Entre 3 y 100 caracteres")
         String teamName,
