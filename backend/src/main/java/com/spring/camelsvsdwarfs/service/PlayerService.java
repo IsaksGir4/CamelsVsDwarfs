@@ -10,10 +10,7 @@ import com.spring.camelsvsdwarfs.entity.PlayerType;
 import com.spring.camelsvsdwarfs.exception.ConflictException;
 import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.PlayerRepository;
-<<<<<<< HEAD
-=======
 import com.spring.camelsvsdwarfs.repository.specification.PlayerSpecification;
->>>>>>> feature/players
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
