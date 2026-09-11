@@ -1,5 +1,4 @@
 package com.spring.camelsvsdwarfs.entity;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +20,7 @@ public class Race {
     private UUID idRace;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="id_organizer", nullable = false)
+    @JoinColumn(name = "id_organizer", nullable = false)
     private User organizer;
 
     @Column(nullable = false, length = 100)

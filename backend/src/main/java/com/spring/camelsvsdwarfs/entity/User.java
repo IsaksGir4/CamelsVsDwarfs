@@ -1,39 +1,31 @@
 package com.spring.camelsvsdwarfs.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
+@Setter
+@Builder
 @Entity
-@Table(name = "users")
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idUser;
 
-    @Column(nullable = false, unique = true, length = 50)
+    // Matches Keycloak's "sub" claim — the stable, unique ID Keycloak assigns
+    // per account. This is how we link a local row back to its Keycloak identity.
+    @Column(nullable = false, unique = true, length = 100)
+    private String keycloakId;
+
+    @Column(nullable = false, unique = true, length = 100)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(length = 150)
     private String email;
-
-    @Column(nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String passwordHash;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
-    @Column(nullable = false)
-    private LocalDateTime registerDate;
 }
