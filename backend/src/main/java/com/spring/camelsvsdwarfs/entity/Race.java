@@ -1,5 +1,4 @@
 package com.spring.camelsvsdwarfs.entity;
-
 import jakarta.persistence.*;
 import lombok.*;
 

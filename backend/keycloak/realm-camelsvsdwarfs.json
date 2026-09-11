@@ -1,0 +1,62 @@
+{
+  "realm": "camelsvsdwarfs",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 1800,
+  "ssoSessionIdleTimeout": 3600,
+  "roles": {
+    "realm": [
+      { "name": "admin", "description": "Manages users, competitors, teams, races, registrations, results and audit records" },
+      { "name": "organizer", "description": "Manages races, registrations and results; views competitors and teams" },
+      { "name": "viewer", "description": "Read-only: public info, schedules, results and standings" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "camelsvsdwarfs-swagger",
+      "name": "CamelsVsDwarfs (Swagger)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:8080/*"],
+      "webOrigins": ["http://localhost:8080"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "defaultClientScopes": ["web-origins", "profile", "roles", "email", "basic"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Byte",
+      "lastName": "Admin",
+      "email": "admin@camelsvsdwarfs.test",
+      "credentials": [{ "type": "password", "value": "admin123", "temporary": false }],
+      "realmRoles": ["admin"]
+    },
+    {
+      "username": "organizer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Race",
+      "lastName": "Organizer",
+      "email": "organizer@camelsvsdwarfs.test",
+      "credentials": [{ "type": "password", "value": "organizer123", "temporary": false }],
+      "realmRoles": ["organizer"]
+    },
+    {
+      "username": "viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Tiny",
+      "lastName": "Viewer",
+      "email": "viewer@camelsvsdwarfs.test",
+      "credentials": [{ "type": "password", "value": "viewer123", "temporary": false }],
+      "realmRoles": ["viewer"]
+    }
+  ]
+}
