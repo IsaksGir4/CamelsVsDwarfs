@@ -7,10 +7,12 @@ import com.spring.camelsvsdwarfs.dto.RaceUpdateDTO;
 import com.spring.camelsvsdwarfs.entity.Race;
 import com.spring.camelsvsdwarfs.entity.RaceStatus;
 import com.spring.camelsvsdwarfs.entity.RaceType;
+import com.spring.camelsvsdwarfs.entity.RegistrationStatus;
 import com.spring.camelsvsdwarfs.entity.User;
 import com.spring.camelsvsdwarfs.exception.ConflictException;
 import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.RaceRepository;
+import com.spring.camelsvsdwarfs.repository.RegisterPlayerRepository;
 import com.spring.camelsvsdwarfs.repository.specification.RaceSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,18 +23,45 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class RaceService {
 
+    /**
+     * Maquina de estados de la carrera.
+     * COMPLETED y CANCELLED son estados finales: una carrera completada
+     * no puede volver a DRAFT, aunque el camello pida la revancha.
+     */
+    private static final Map<RaceStatus, Set<RaceStatus>> ALLOWED_TRANSITIONS = Map.of(
+            RaceStatus.DRAFT, EnumSet.of(RaceStatus.OPEN_FOR_REGISTRATION, RaceStatus.CANCELLED),
+            RaceStatus.OPEN_FOR_REGISTRATION, EnumSet.of(RaceStatus.CLOSED_FOR_REGISTRATION, RaceStatus.CANCELLED),
+            RaceStatus.CLOSED_FOR_REGISTRATION, EnumSet.of(RaceStatus.IN_PROGRESS,
+                    RaceStatus.OPEN_FOR_REGISTRATION, RaceStatus.CANCELLED),
+            RaceStatus.IN_PROGRESS, EnumSet.of(RaceStatus.COMPLETED, RaceStatus.CANCELLED),
+            RaceStatus.COMPLETED, EnumSet.noneOf(RaceStatus.class),
+            RaceStatus.CANCELLED, EnumSet.noneOf(RaceStatus.class)
+    );
+
+    private static final Set<RaceStatus> NON_EDITABLE_STATUSES =
+            EnumSet.of(RaceStatus.IN_PROGRESS, RaceStatus.COMPLETED, RaceStatus.CANCELLED);
+
+    private static final Set<RegistrationStatus> ACTIVE_REGISTRATIONS =
+            EnumSet.of(RegistrationStatus.PENDING, RegistrationStatus.APPROVED);
+
     private final RaceRepository raceRepository;
+    private final RegisterPlayerRepository registerPlayerRepository;
     private final UserSyncService userSyncService;
 
     @Transactional
     public RaceResponseDTO create(RaceCreateDTO dto, Jwt jwt) {
-        validateDeadlineBeforeStart(dto.registrationDeadline(), dto.programationDate());
+        validateSchedule(dto.programationDate(), dto.programationHour(), dto.registrationDeadline());
 
         User organizer = userSyncService.findOrCreateUser(jwt);
 
@@ -57,8 +86,7 @@ public class RaceService {
 
     @Transactional(readOnly = true)
     public RaceResponseDTO findById(UUID id) {
-        Race race = findEntityById(id);
-        return toResponseDTO(race);
+        return toResponseDTO(findEntityById(id));
     }
 
     @Transactional(readOnly = true)
@@ -78,11 +106,29 @@ public class RaceService {
     public RaceResponseDTO update(UUID id, RaceUpdateDTO dto) {
         Race race = findEntityById(id);
 
-        if (race.getRaceStatus() == RaceStatus.COMPLETED) {
-            throw new ConflictException("Una carrera completada no puede ser editada");
+        if (NON_EDITABLE_STATUSES.contains(race.getRaceStatus())) {
+            throw new ConflictException(
+                    "No se puede editar una carrera en estado " + race.getRaceStatus());
         }
 
-        validateDeadlineBeforeStart(dto.registrationDeadline(), dto.programationDate());
+        // Solo se revalida el calendario si cambio; asi se puede editar la descripcion
+        // de una carrera cuya fecha limite ya paso sin que el sistema lo impida.
+        boolean scheduleChanged = !race.getProgramationDate().equals(dto.programationDate())
+                || !race.getProgramationHour().equals(dto.programationHour())
+                || !race.getRegistrationDeadline().equals(dto.registrationDeadline());
+
+        if (scheduleChanged) {
+            validateSchedule(dto.programationDate(), dto.programationHour(), dto.registrationDeadline());
+        }
+
+        long activeRegistrations = registerPlayerRepository.countByRace_IdRaceAndStatusIn(id, ACTIVE_REGISTRATIONS);
+        if (dto.maxPlayers() < activeRegistrations) {
+            throw new ConflictException("No se puede reducir el maximo a " + dto.maxPlayers()
+                    + ": la carrera ya tiene " + activeRegistrations + " inscripciones activas");
+        }
+        if (activeRegistrations > 0 && race.getRaceType() != dto.raceType()) {
+            throw new ConflictException("No se puede cambiar el tipo de carrera cuando ya tiene inscripciones activas");
+        }
 
         race.setRaceName(dto.raceName());
         race.setDescription(dto.description());
@@ -95,8 +141,7 @@ public class RaceService {
         race.setRaceType(dto.raceType());
         race.setRegistrationDeadline(dto.registrationDeadline());
 
-        Race updated = raceRepository.save(race);
-        return toResponseDTO(updated);
+        return toResponseDTO(raceRepository.save(race));
     }
 
     @Transactional
@@ -109,17 +154,29 @@ public class RaceService {
             throw new ConflictException("La carrera ya se encuentra en estado " + next);
         }
 
-        if (current == RaceStatus.COMPLETED) {
-            throw new ConflictException("Una carrera completada no puede cambiar de estado");
+        if (!ALLOWED_TRANSITIONS.getOrDefault(current, Set.of()).contains(next)) {
+            throw new ConflictException("Transicion de estado no permitida: " + current + " -> " + next);
         }
 
-        if (current == RaceStatus.CANCELLED) {
-            throw new ConflictException("Una carrera cancelada no puede cambiar de estado");
+        if (next == RaceStatus.OPEN_FOR_REGISTRATION
+                && race.getRegistrationDeadline().isBefore(LocalDate.now())) {
+            throw new ConflictException(
+                    "No se pueden abrir inscripciones: la fecha limite de registro ya paso");
         }
+
+        if (next == RaceStatus.IN_PROGRESS) {
+            long approved = registerPlayerRepository.countByRace_IdRaceAndStatus(id, RegistrationStatus.APPROVED);
+            if (approved < 2) {
+                throw new ConflictException("Se requieren al menos 2 participantes aprobados para iniciar la carrera"
+                        + " (actualmente: " + approved + ")");
+            }
+        }
+
+        // TODO(feature/results): COMPLETED exige resultados oficiales
+        //   (standingResultRepository.existsByRace_IdRace(id))
 
         race.setRaceStatus(next);
-        Race updated = raceRepository.save(race);
-        return toResponseDTO(updated);
+        return toResponseDTO(raceRepository.save(race));
     }
 
     @Transactional
@@ -135,10 +192,17 @@ public class RaceService {
         raceRepository.delete(race);
     }
 
-    private void validateDeadlineBeforeStart(LocalDate registrationDeadline, LocalDate programationDate) {
-        if (!registrationDeadline.isBefore(programationDate)) {
+    private void validateSchedule(LocalDate date, LocalTime hour, LocalDate registrationDeadline) {
+        LocalDateTime start = LocalDateTime.of(date, hour);
+        if (start.isBefore(LocalDateTime.now())) {
+            throw new ConflictException("La carrera no puede programarse en el pasado");
+        }
+        if (!registrationDeadline.isBefore(date)) {
             throw new ConflictException(
                     "La fecha limite de registro debe ser anterior a la fecha de la carrera");
+        }
+        if (registrationDeadline.isBefore(LocalDate.now())) {
+            throw new ConflictException("La fecha limite de registro no puede estar en el pasado");
         }
     }
 
