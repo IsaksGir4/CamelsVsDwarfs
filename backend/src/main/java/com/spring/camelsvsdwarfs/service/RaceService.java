@@ -14,6 +14,7 @@ import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.RaceRepository;
 import com.spring.camelsvsdwarfs.repository.RegisterPlayerRepository;
 import com.spring.camelsvsdwarfs.repository.specification.RaceSpecification;
+import com.spring.camelsvsdwarfs.repository.StandingResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -58,6 +60,7 @@ public class RaceService {
     private final RaceRepository raceRepository;
     private final RegisterPlayerRepository registerPlayerRepository;
     private final UserSyncService userSyncService;
+    private final StandingResultRepository standingResultRepository;
 
     @Transactional
     public RaceResponseDTO create(RaceCreateDTO dto, Jwt jwt) {
@@ -172,8 +175,13 @@ public class RaceService {
             }
         }
 
-        // TODO(feature/results): COMPLETED exige resultados oficiales
-        //   (standingResultRepository.existsByRace_IdRace(id))
+        if (next == RaceStatus.COMPLETED) {
+            boolean hasResults = standingResultRepository.existsByRace_IdRace(id);
+            if (!hasResults) {
+                throw new ConflictException(
+                        "No se puede completar la carrera sin resultados oficiales registrados");
+            }
+        }
 
         race.setRaceStatus(next);
         return toResponseDTO(raceRepository.save(race));
