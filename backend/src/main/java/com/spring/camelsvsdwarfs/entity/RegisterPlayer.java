@@ -1,5 +1,4 @@
 package com.spring.camelsvsdwarfs.entity;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,7 +32,7 @@ public class RegisterPlayer {
     private Team team;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="id_user", nullable = false)
+    @JoinColumn(name = "id_user", nullable = false)
     private User registeringUser;
 
     @Builder.Default

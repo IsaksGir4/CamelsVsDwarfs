@@ -38,3 +38,5 @@ out/
 
 ### ENVIRONMENT ###
 .env
+app-logs.txt
+*.pdf

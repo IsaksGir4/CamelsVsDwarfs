@@ -1,21 +1,31 @@
 package com.spring.camelsvsdwarfs.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.util.UUID;
+
+@Getter
+@Setter
+@Builder
 @Entity
-@Table(name = "users")
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private Long id;
+    private UUID idUser;
+
+    // Matches Keycloak's "sub" claim — the stable, unique ID Keycloak assigns
+    // per account. This is how we link a local row back to its Keycloak identity.
+    @Column(nullable = false, unique = true, length = 100)
+    private String keycloakId;
+
+    @Column(nullable = false, unique = true, length = 100)
     private String username;
-    private String password;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+
+    @Column(length = 150)
+    private String email;
 }

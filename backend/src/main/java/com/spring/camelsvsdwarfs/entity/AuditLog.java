@@ -6,6 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -23,8 +26,9 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idAuditLog;
 
-    @Column(name = "id_user")
-    private UUID idUser;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_user")
+    private User user;
 
     @Column(nullable = false)
     private String action;
@@ -32,7 +36,7 @@ public class AuditLog {
     private String entityType;
 
     @Column(nullable = false)
-    private String entityId;
+    private UUID entityId;
 
     @Column(length = 512)
     private String description;
