@@ -5,13 +5,6 @@
   "registrationAllowed": true,
   "accessTokenLifespan": 1800,
   "ssoSessionIdleTimeout": 3600,
-  "defaultRole": {
-    "name": "default-roles-camelsvsdwarfs",
-    "composite": true,
-    "composites": {
-      "realm": ["viewer"]
-    }
-  },
   "roles": {
     "realm": [
       { "name": "admin", "description": "Manages users, competitors, teams, races, registrations, results and audit records" },
