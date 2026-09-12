@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -24,6 +25,13 @@ public interface RegisterPlayerRepository extends JpaRepository<RegisterPlayer, 
 
     boolean existsByRace_IdRaceAndTeam_IdTeamAndStatusIn(UUID raceId, UUID teamId,
                                                          Collection<RegistrationStatus> statuses);
+
+    // Necesario para copiar el startPosition al registrar un resultado
+    Optional<RegisterPlayer> findByRace_IdRaceAndPlayer_IdPlayerAndStatusIn(UUID raceId, UUID playerId,
+                                                                            Collection<RegistrationStatus> statuses);
+
+    Optional<RegisterPlayer> findByRace_IdRaceAndTeam_IdTeamAndStatusIn(UUID raceId, UUID teamId,
+                                                                        Collection<RegistrationStatus> statuses);
 
     // Posiciones de salida no duplicadas
     boolean existsByRace_IdRaceAndStartPositionAndStatusIn(UUID raceId, Integer startPosition,
