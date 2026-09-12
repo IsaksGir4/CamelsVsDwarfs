@@ -82,7 +82,10 @@ public class ResultService {
     @Transactional
     public ResultResponseDTO update(UUID id, ResultUpdateDTO dto) {
         StandingResult result = findEntityById(id);
+        Race race = result.getRace();
         UUID raceId = result.getRace().getIdRace();
+
+        validateRaceEditable(race);
 
         validateResultConsistency(dto.statusResult(), dto.endPosition(), dto.totalTimeMs());
 
@@ -158,6 +161,16 @@ public class ResultService {
         return registration.orElseThrow(() -> new ConflictException(
                 "El participante no tiene una inscripcion APPROVED en esta carrera"));
     }
+
+    private void validateRaceEditable(Race race) {
+        if (race.getRaceStatus() != RaceStatus.IN_PROGRESS
+                && race.getRaceStatus() != RaceStatus.COMPLETED) {
+            throw new ConflictException(
+                    "Solo se pueden modificar resultados de carreras IN_PROGRESS o COMPLETED "
+                            + "(estado actual: " + race.getRaceStatus() + ")");
+        }
+    }
+
 
     private void validateNoDuplicateResult(UUID raceId, UUID playerId, UUID teamId) {
         boolean exists = playerId != null
