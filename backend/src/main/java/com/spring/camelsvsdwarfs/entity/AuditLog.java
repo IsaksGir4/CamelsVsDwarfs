@@ -36,7 +36,7 @@ public class AuditLog {
     private String entityType;
 
     @Column(nullable = false)
-    private String entityId;
+    private UUID entityId;
 
     @Column(length = 512)
     private String description;
