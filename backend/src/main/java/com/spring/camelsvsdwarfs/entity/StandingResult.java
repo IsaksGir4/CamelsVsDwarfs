@@ -12,7 +12,11 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "standing_results")
+@Table(name = "standing_results", indexes = {
+        @Index(name = "idx_result_race", columnList = "id_race"),
+        @Index(name = "idx_result_player", columnList = "id_player"),
+        @Index(name = "idx_result_team", columnList = "id_team")
+})
 // Restricción XOR exigida por la arquitectura polimórfica de participantes
 @org.hibernate.annotations.Check(constraints = "(id_player IS NOT NULL AND id_team IS NULL) OR (id_player IS NULL AND id_team IS NOT NULL)")
 public class StandingResult {

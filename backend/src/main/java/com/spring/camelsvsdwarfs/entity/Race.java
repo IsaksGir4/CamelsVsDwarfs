@@ -13,7 +13,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "races")
+@Table(name = "races", indexes = {
+        @Index(name = "idx_race_status", columnList = "race_status"),
+        @Index(name = "idx_race_date", columnList = "programation_date")
+})
 public class Race {
 
     @Id
