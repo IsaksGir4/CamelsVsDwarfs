@@ -34,7 +34,7 @@ import {
 
 export const Route = createFileRoute("/competidores/$competitorId/")({
   component: CompetitorDetailPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
   notFoundComponent: () => <div>Competidor no encontrado.</div>,
 });
 

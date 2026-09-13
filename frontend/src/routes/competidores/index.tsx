@@ -72,7 +72,7 @@ export const Route = createFileRoute("/competidores/")({
     ],
   }),
   component: CompetitorsPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 const PAGE_SIZE = 10;

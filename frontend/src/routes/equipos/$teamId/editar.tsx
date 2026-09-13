@@ -17,7 +17,7 @@ import { ApiError, errorMessage } from "@/lib/api";
 
 export const Route = createFileRoute("/equipos/$teamId/editar")({
   component: EditTeamPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 const VALID_CATEGORIES = ["DUO", "TRIO", "QUARTET"] as const;

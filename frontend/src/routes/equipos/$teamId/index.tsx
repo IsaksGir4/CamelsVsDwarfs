@@ -60,7 +60,7 @@ import {
 
 export const Route = createFileRoute("/equipos/$teamId/")({
   component: TeamDetailPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
   notFoundComponent: () => <div>Equipo no encontrado.</div>,
 });
 

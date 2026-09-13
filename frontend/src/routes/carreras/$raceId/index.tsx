@@ -55,7 +55,6 @@ import {
   raceDate,
   RACE_TRANSITIONS,
   RACE_STATUS_LABEL,
-  RACE_STATUSES,
   RACE_TYPE_LABEL,
   RESULT_STATUSES,
   type Race,
@@ -65,7 +64,7 @@ import {
 
 export const Route = createFileRoute("/carreras/$raceId/")({
   component: RaceDetailPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
   notFoundComponent: () => <div>Carrera no encontrada.</div>,
 });
 

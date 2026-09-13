@@ -18,7 +18,7 @@ export const Route = createFileRoute("/competidores/nuevo")({
     ],
   }),
   component: NewCompetitorPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 function NewCompetitorPage() {
@@ -30,8 +30,8 @@ function NewCompetitorPage() {
       const created = await createCompetitor(values);
       await queryClient.invalidateQueries({ queryKey: ["competitors"] });
       toast.success("Competidor creado correctamente.");
-      if (created?.id) {
-        await navigate({ to: "/competidores/$competitorId", params: { competitorId: created.id } });
+      if (created?.idPlayer) {
+        await navigate({ to: "/competidores/$competitorId", params: { competitorId: created.idPlayer } });
       } else {
         await navigate({ to: "/competidores" });
       }

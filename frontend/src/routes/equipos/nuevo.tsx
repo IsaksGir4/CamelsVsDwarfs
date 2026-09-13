@@ -10,7 +10,7 @@ import { ApiError, errorMessage } from "@/lib/api";
 
 export const Route = createFileRoute("/equipos/nuevo")({
   component: NewTeamPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 function NewTeamPage() {

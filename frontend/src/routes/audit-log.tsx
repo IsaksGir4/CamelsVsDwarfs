@@ -19,7 +19,7 @@ import { auditQuery } from "@/lib/league-api";
 
 export const Route = createFileRoute("/audit-log")({
   component: AuditLogPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 const dateTimeFmt = new Intl.DateTimeFormat("es", {

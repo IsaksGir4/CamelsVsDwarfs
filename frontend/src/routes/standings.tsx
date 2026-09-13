@@ -22,7 +22,7 @@ import { playerStandingsQuery, teamStandingsQuery, POINTS_TABLE } from "@/lib/le
 
 export const Route = createFileRoute("/standings")({
   component: StandingsPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 type Tab = "competidores" | "equipos";

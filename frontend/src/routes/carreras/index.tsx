@@ -45,7 +45,7 @@ const raceSearchSchema = z.object({
 export const Route = createFileRoute("/carreras/")({
   validateSearch: raceSearchSchema,
   component: RacesPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 const dateFmt = new Intl.DateTimeFormat("es", {

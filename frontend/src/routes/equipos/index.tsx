@@ -43,7 +43,7 @@ const teamSearchSchema = z.object({
 export const Route = createFileRoute("/equipos/")({
   validateSearch: teamSearchSchema,
   component: TeamsPage,
-  errorComponent: ({ error }) => <div role="alert">{error.message}</div>,
+  errorComponent: ({ error }) => <div role="alert">{error instanceof Error ? error.message : "Error inesperado"}</div>,
 });
 
 const STATUS_LABEL: Record<string, string> = {
