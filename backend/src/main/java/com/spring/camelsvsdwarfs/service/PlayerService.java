@@ -27,9 +27,10 @@ import java.util.UUID;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
-
     private final StandingResultRepository standingResultRepository;
+    private final AuditService auditService;
 
+    @Transactional
     public PlayerResponseDTO create(PlayerCreateDTO dto){
         if (playerRepository.existsByNickname(dto.nickname())) {
             throw new ConflictException("Ya existe un competidor con el nickname '" + dto.nickname() + "'");
@@ -51,6 +52,10 @@ public class PlayerService {
                 .build();
 
         Player saved = playerRepository.save(player);
+
+        auditService.log("CREATE", "Player", saved.getIdPlayer(),
+                "Competidor creado: " + saved.getName() + " (" + saved.getNickname() + ")");
+
         return toResponseDTO(saved);
     }
 
@@ -77,7 +82,7 @@ public class PlayerService {
 
         //Si se cambia el nickname, se valida que el nuevo no choque con otro jugador
         if (!player.getNickname().equals(dto.nickname())
-        && playerRepository.existsByNickname(dto.nickname())){
+                && playerRepository.existsByNickname(dto.nickname())){
             throw  new ConflictException("Ya existe un competidor con el nickname '" + dto.nickname() + "'");
         }
 
@@ -90,6 +95,10 @@ public class PlayerService {
         player.setPlaceOfBirth(dto.placeOfBirth());
 
         Player updated = playerRepository.save(player);
+
+        auditService.log("UPDATE", "Player", updated.getIdPlayer(),
+                "Competidor actualizado: " + updated.getNickname());
+
         return toResponseDTO(updated);
     }
 
@@ -104,9 +113,15 @@ public class PlayerService {
         player.setActualState(next);
 
         Player updated = playerRepository.save(player);
+
+        auditService.log("STATUS_CHANGE", "Player", updated.getIdPlayer(),
+                "Cambio de estado del competidor " + updated.getNickname(),
+                String.valueOf(current), String.valueOf(next));
+
         return toResponseDTO(updated);
     }
 
+    @Transactional
     public void delete(UUID id){
         Player player = findEntityById(id);
 
@@ -115,6 +130,9 @@ public class PlayerService {
                     "No se puede eliminar un competidor con resultados oficiales registrados. " +
                             "Debe ser retirado (RETIRED) en su lugar.");
         }
+        auditService.log("DELETE", "Player", id,
+                "Competidor eliminado: " + player.getNickname());
+
         playerRepository.delete(player);
     }
 

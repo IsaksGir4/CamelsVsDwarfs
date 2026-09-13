@@ -41,3 +41,5 @@ out/
 app-logs.txt
 *.pdf.env
 .env.demo
+
+*.pdf

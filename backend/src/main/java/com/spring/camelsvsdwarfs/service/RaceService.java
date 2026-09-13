@@ -61,6 +61,7 @@ public class RaceService {
     private final RegisterPlayerRepository registerPlayerRepository;
     private final UserSyncService userSyncService;
     private final StandingResultRepository standingResultRepository;
+    private final AuditService auditService;
 
     @Transactional
     public RaceResponseDTO create(RaceCreateDTO dto, Jwt jwt) {
@@ -84,6 +85,10 @@ public class RaceService {
                 .build();
 
         Race saved = raceRepository.save(race);
+
+        auditService.log(jwt, "CREATE", "Race", saved.getIdRace(),
+                "Carrera creada: " + saved.getRaceName(), null, null);
+
         return toResponseDTO(saved);
     }
 
@@ -144,7 +149,12 @@ public class RaceService {
         race.setRaceType(dto.raceType());
         race.setRegistrationDeadline(dto.registrationDeadline());
 
-        return toResponseDTO(raceRepository.save(race));
+        Race updated = raceRepository.save(race);
+
+        auditService.log("UPDATE", "Race", updated.getIdRace(),
+                "Carrera actualizada: " + updated.getRaceName());
+
+        return toResponseDTO(updated);
     }
 
     @Transactional
@@ -184,7 +194,14 @@ public class RaceService {
         }
 
         race.setRaceStatus(next);
-        return toResponseDTO(raceRepository.save(race));
+        Race updated = raceRepository.save(race);
+
+        auditService.log(next == RaceStatus.CANCELLED ? "CANCEL" : "STATUS_CHANGE",
+                "Race", updated.getIdRace(),
+                "Cambio de estado de la carrera " + updated.getRaceName(),
+                String.valueOf(current), String.valueOf(next));
+
+        return toResponseDTO(updated);
     }
 
     @Transactional
@@ -196,6 +213,9 @@ public class RaceService {
                     "Solo se pueden eliminar carreras en estado DRAFT. " +
                             "Use CANCELLED para carreras que ya avanzaron de estado.");
         }
+
+        auditService.log("DELETE", "Race", id,
+                "Carrera eliminada: " + race.getRaceName());
 
         raceRepository.delete(race);
     }
