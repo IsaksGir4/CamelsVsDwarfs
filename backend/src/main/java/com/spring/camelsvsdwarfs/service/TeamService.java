@@ -8,6 +8,7 @@ import com.spring.camelsvsdwarfs.repository.PlayerRepository;
 import com.spring.camelsvsdwarfs.repository.TeamMemberRepository;
 import com.spring.camelsvsdwarfs.repository.TeamRepository;
 import com.spring.camelsvsdwarfs.repository.specification.TeamSpecification;
+import com.spring.camelsvsdwarfs.repository.StandingResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final PlayerRepository playerRepository;
+    private final StandingResultRepository standingResultRepository;
 
     @Transactional
     public TeamResponseDTO create(TeamCreateDTO dto) {
@@ -108,11 +110,9 @@ public class TeamService {
     public void delete(UUID id) {
         Team team = findEntityById(id);
 
-        // TODO(feature/results): proxy temporal mientras no existe StandingResultRepository.
-        if ((team.getVictories() != null && team.getVictories() > 0)
-                || (team.getDefeats() != null && team.getDefeats() > 0)) {
+        if (standingResultRepository.existsByTeam_IdTeam(id)) {
             throw new ConflictException(
-                    "No se puede eliminar un equipo con historial de carreras. " +
+                    "No se puede eliminar un equipo con resultados oficiales registrados. " +
                             "Debe ser desactivado (INACTIVE) en su lugar.");
         }
 

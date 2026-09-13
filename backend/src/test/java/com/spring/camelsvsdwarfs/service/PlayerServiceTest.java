@@ -10,6 +10,7 @@ import com.spring.camelsvsdwarfs.entity.PlayerType;
 import com.spring.camelsvsdwarfs.exception.ConflictException;
 import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.PlayerRepository;
+import com.spring.camelsvsdwarfs.repository.StandingResultRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,9 @@ public class PlayerServiceTest {
 
     private UUID playerId;
     private Player existingPlayer;
+
+    @Mock
+    private StandingResultRepository standingResultRepository;
 
     @BeforeEach
     void setUp() {
@@ -232,8 +236,8 @@ public class PlayerServiceTest {
 
     @Test
     void delete_sinCarrerasCompletadas_eliminaCorrectamente() {
-        existingPlayer.setRacesCompleted(0);
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
+        when(standingResultRepository.existsByPlayer_IdPlayer(playerId)).thenReturn(false);
 
         playerService.delete(playerId);
 
@@ -242,8 +246,8 @@ public class PlayerServiceTest {
 
     @Test
     void delete_conCarrerasCompletadas_lanzaConflictExceptionYNoElimina() {
-        existingPlayer.setRacesCompleted(3);
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
+        when(standingResultRepository.existsByPlayer_IdPlayer(playerId)).thenReturn(true);
 
         assertThatThrownBy(() -> playerService.delete(playerId))
                 .isInstanceOf(ConflictException.class);

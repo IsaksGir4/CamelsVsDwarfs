@@ -13,8 +13,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name="races")
+@Table(name = "races", indexes = {
+        @Index(name = "idx_race_status", columnList = "race_status"),
+        @Index(name = "idx_race_date", columnList = "programation_date")
+})
 public class Race {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idRace;
@@ -26,7 +30,7 @@ public class Race {
     @Column(nullable = false, length = 100)
     private String raceName;
 
-    @Column(nullable = false, length = 512)
+    @Column(length = 512)
     private String description;
 
     @Column(nullable = false)
@@ -58,11 +62,20 @@ public class Race {
     @Column(nullable = false)
     private LocalDate registrationDeadline;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private LocalDateTime creatiojnDate = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime creationDate;
 
-    @Builder.Default
     @Column(nullable = false)
-    private LocalDateTime lastUpdate = LocalDateTime.now();
+    private LocalDateTime lastUpdate;
+
+    @PrePersist
+    protected void onCreate() {
+        creationDate = LocalDateTime.now();
+        lastUpdate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        lastUpdate = LocalDateTime.now();
+    }
 }

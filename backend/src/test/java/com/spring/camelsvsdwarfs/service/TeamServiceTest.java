@@ -9,6 +9,7 @@ import com.spring.camelsvsdwarfs.entity.*;
 import com.spring.camelsvsdwarfs.exception.ConflictException;
 import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.PlayerRepository;
+import com.spring.camelsvsdwarfs.repository.StandingResultRepository;
 import com.spring.camelsvsdwarfs.repository.TeamMemberRepository;
 import com.spring.camelsvsdwarfs.repository.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,9 @@ class TeamServiceTest {
 
     @Mock
     private PlayerRepository playerRepository;
+
+    @Mock
+    private StandingResultRepository standingResultRepository;
 
     @InjectMocks
     private TeamService teamService;
@@ -164,6 +168,7 @@ class TeamServiceTest {
     @Test
     void delete_sinHistorialDeCarreras_eliminaCorrectamente() {
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(existingTeam));
+        when(standingResultRepository.existsByTeam_IdTeam(teamId)).thenReturn(false);
 
         teamService.delete(teamId);
 
@@ -172,8 +177,8 @@ class TeamServiceTest {
 
     @Test
     void delete_conVictoriasRegistradas_lanzaConflictExceptionYNoElimina() {
-        existingTeam.setVictories(2);
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(existingTeam));
+        when(standingResultRepository.existsByTeam_IdTeam(teamId)).thenReturn(true);
 
         assertThatThrownBy(() -> teamService.delete(teamId))
                 .isInstanceOf(ConflictException.class);

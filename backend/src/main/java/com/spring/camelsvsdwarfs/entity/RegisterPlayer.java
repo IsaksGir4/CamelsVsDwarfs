@@ -11,7 +11,11 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="register_player")
+@Table(name = "register_player", indexes = {
+        @Index(name = "idx_register_race_status", columnList = "id_race, status"),
+        @Index(name = "idx_register_player", columnList = "id_player"),
+        @Index(name = "idx_register_team", columnList = "id_team")
+})
 //Restriccion a nivel de base de datos para la logica XOR
 @org.hibernate.annotations.Check(constraints = "(id_player IS NOT NULL AND id_team IS NULL) OR (id_player IS NULL AND id_team IS NOT NULL)")
 public class RegisterPlayer {
