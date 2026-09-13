@@ -50,6 +50,9 @@ class ResultServiceTest {
     @Mock
     private UserSyncService userSyncService;
 
+    @Mock
+    private AuditService auditService;
+
     @InjectMocks
     private ResultService resultService;
 

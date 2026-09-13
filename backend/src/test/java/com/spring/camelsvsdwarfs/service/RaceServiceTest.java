@@ -12,6 +12,7 @@ import com.spring.camelsvsdwarfs.exception.ConflictException;
 import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.RaceRepository;
 import com.spring.camelsvsdwarfs.repository.RegisterPlayerRepository;
+import com.spring.camelsvsdwarfs.repository.StandingResultRepository;
 import com.spring.camelsvsdwarfs.entity.RegistrationStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,12 @@ class RaceServiceTest {
 
     @Mock
     private UserSyncService userSyncService;
+
+    @Mock
+    private StandingResultRepository standingResultRepository;
+
+    @Mock
+    private AuditService auditService;
 
     @InjectMocks
     private RaceService raceService;

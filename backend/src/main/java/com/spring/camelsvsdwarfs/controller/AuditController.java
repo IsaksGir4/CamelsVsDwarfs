@@ -6,6 +6,7 @@ import com.spring.camelsvsdwarfs.repository.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +24,8 @@ public class AuditController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<AuditLogResponseDTO>> findAll(
-            @PageableDefault(size = 20, sort = "timestamp") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "timestamp", direction = Sort.Direction.DESC)
+            Pageable pageable) {
 
         Page<AuditLogResponseDTO> result = auditLogRepository.findAll(pageable)
                 .map(this::toResponseDTO);

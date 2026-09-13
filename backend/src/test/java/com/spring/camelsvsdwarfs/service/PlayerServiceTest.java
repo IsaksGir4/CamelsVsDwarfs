@@ -48,6 +48,9 @@ public class PlayerServiceTest {
     @Mock
     private StandingResultRepository standingResultRepository;
 
+    @Mock
+    private AuditService auditService;
+
     @BeforeEach
     void setUp() {
         playerId = UUID.randomUUID();

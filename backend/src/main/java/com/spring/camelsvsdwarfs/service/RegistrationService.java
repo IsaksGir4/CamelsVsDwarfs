@@ -39,6 +39,7 @@ public class RegistrationService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final UserSyncService userSyncService;
+    private final AuditService auditService;
 
     // ------------------------------------------------------------------ create
 
@@ -81,7 +82,12 @@ public class RegistrationService {
 
         builder.registeringUser(userSyncService.findOrCreateUser(jwt));
 
-        return toResponseDTO(registrationRepository.save(builder.build()));
+        RegisterPlayer saved = registrationRepository.save(builder.build());
+
+        auditService.log(jwt, "CREATE", "Registration", saved.getIdRegister(),
+                "Inscripcion creada en la carrera " + race.getRaceName(), null, null);
+
+        return toResponseDTO(saved);
     }
 
     // ------------------------------------------------------------------ queries
@@ -134,7 +140,13 @@ public class RegistrationService {
         }
 
         registration.setStatus(RegistrationStatus.APPROVED);
-        return toResponseDTO(registrationRepository.save(registration));
+        RegisterPlayer updated = registrationRepository.save(registration);
+
+        auditService.log("APPROVE", "Registration", updated.getIdRegister(),
+                "Inscripcion aprobada en la carrera " + race.getRaceName(),
+                "PENDING", "APPROVED");
+
+        return toResponseDTO(updated);
     }
 
     @Transactional
@@ -148,9 +160,16 @@ public class RegistrationService {
         }
         validateRaceManageable(registration.getRace());
 
+        RegistrationStatus previous = registration.getStatus();
         registration.setStatus(RegistrationStatus.REJECTED);
         registration.setValidationNotes(dto.reason());
-        return toResponseDTO(registrationRepository.save(registration));
+        RegisterPlayer updated = registrationRepository.save(registration);
+
+        auditService.log("REJECT", "Registration", updated.getIdRegister(),
+                "Inscripcion rechazada: " + dto.reason(),
+                String.valueOf(previous), "REJECTED");
+
+        return toResponseDTO(updated);
     }
 
     /** DELETE: cancelacion logica, se conserva el historial. */
@@ -164,8 +183,13 @@ public class RegistrationService {
         }
         validateRaceManageable(registration.getRace());
 
+        RegistrationStatus previous = registration.getStatus();
         registration.setStatus(RegistrationStatus.CANCELLED);
         registrationRepository.save(registration);
+
+        auditService.log("CANCEL", "Registration", registration.getIdRegister(),
+                "Inscripcion cancelada",
+                String.valueOf(previous), "CANCELLED");
     }
 
     // ------------------------------------------------------------------ reglas

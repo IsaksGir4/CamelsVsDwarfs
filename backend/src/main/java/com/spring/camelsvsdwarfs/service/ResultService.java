@@ -24,6 +24,7 @@ public class ResultService {
     private final TeamRepository teamRepository;
     private final RegisterPlayerRepository registerPlayerRepository;
     private final UserSyncService userSyncService;
+    private final AuditService auditService;
 
     @Transactional
     public ResultResponseDTO create(UUID raceId, ResultCreateDTO dto, Jwt jwt) {
@@ -62,6 +63,12 @@ public class ResultService {
 
         StandingResult saved = standingResultRepository.save(result);
         recalculateStatsForRace(raceId);
+
+        auditService.log(jwt, "CREATE", "Result", saved.getIdStandingResult(),
+                "Resultado registrado en la carrera " + race.getRaceName()
+                        + " (posicion " + dto.endPosition() + ", " + dto.statusResult() + ")",
+                null, null);
+
         return toResponseDTO(saved);
     }
 
@@ -87,6 +94,8 @@ public class ResultService {
 
         validateRaceEditable(race);
 
+        String previousValue = result.getStatusResult() + " / pos " + result.getEndPosition();
+
         validateResultConsistency(dto.statusResult(), dto.endPosition(), dto.totalTimeMs());
 
         if (dto.statusResult() == ResultStatus.FINISHED) {
@@ -102,6 +111,11 @@ public class ResultService {
 
         StandingResult updated = standingResultRepository.save(result);
         recalculateStatsForRace(raceId);
+
+        auditService.log("UPDATE", "Result", updated.getIdStandingResult(),
+                "Resultado modificado en la carrera " + race.getRaceName(),
+                previousValue, dto.statusResult() + " / pos " + dto.endPosition());
+
         return toResponseDTO(updated);
     }
 
