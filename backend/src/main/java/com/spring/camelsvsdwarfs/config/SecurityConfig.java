@@ -40,7 +40,15 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ROUTES).permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                        .authenticationEntryPoint((req, res, e) -> {
+                            res.setStatus(401);
+                            res.setContentType("application/json");
+                            res.getWriter().write("""
+                                {"timestamp":"%s","status":401,"error":"Unauthorized",
+                                 "message":"Autenticacion requerida o invalida","path":"%s"}
+                                """.formatted(java.time.LocalDateTime.now(), req.getRequestURI()));
+                        }))
                 .build();
     }
 

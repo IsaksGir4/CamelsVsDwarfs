@@ -20,8 +20,9 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="audit_logs")
+@Table(name = "audit_logs")
 public class AuditLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idAuditLog;
@@ -33,18 +34,19 @@ public class AuditLog {
     @Column(nullable = false)
     private String action;
 
+    @Column(columnDefinition = "TEXT")
     private String entityType;
 
     @Column(nullable = false)
     private UUID entityId;
 
-    @Column(length = 512)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 512)
+    @Column(columnDefinition = "TEXT")
     private String oldValue;
 
-    @Column(length = 512)
+    @Column(columnDefinition = "TEXT")
     private String newValue;
 
     @Builder.Default
