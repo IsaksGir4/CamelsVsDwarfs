@@ -1,4 +1,4 @@
-name: camelsvsdwarfs
+name: camelsvsdwarfs-demo
 
 services:
   app:
@@ -6,20 +6,17 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: camelsvsdwarfs-app:latest
-    pull_policy: build
-    container_name: camelsvsdwarfs-app
+    container_name: camelsvsdwarfs-app-demo
     restart: unless-stopped
     ports:
       - "8080:8080"
     depends_on:
-      db:
-        condition: service_healthy
       keycloak:
         condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DB_HOST=db
-      - DB_PORT=5432
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - DB_USERNAME=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -27,16 +24,10 @@ services:
       - KEYCLOAK_ISSUER_URI=http://localhost:${KEYCLOAK_PORT:-8180}/realms/camelsvsdwarfs
     networks:
       - camelsvsdwarfs-network
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 40s
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
-    container_name: camelsvsdwarfs-keycloak
+    container_name: camelsvsdwarfs-keycloak-demo
     restart: unless-stopped
     command: ["start-dev", "--import-realm"]
     environment:
@@ -59,30 +50,6 @@ services:
       retries: 20
       start_period: 30s
 
-  db:
-    image: postgres:15-alpine
-    container_name: camelsvsdwarfs-db
-    restart: unless-stopped
-    ports:
-      - "${DB_PORT}:5432"
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - camelsvsdwarfs-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
 networks:
   camelsvsdwarfs-network:
     driver: bridge
-
-volumes:
-  postgres_data:
