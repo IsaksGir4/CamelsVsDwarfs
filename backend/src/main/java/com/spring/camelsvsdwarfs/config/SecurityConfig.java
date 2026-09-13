@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
                         .authenticationEntryPoint((req, res, e) -> {
                             res.setStatus(401);
-                            res.setContentType("application/json");
+                            res.setContentType("application/json;charset=UTF-8");;
                             res.getWriter().write("""
                                 {"timestamp":"%s","status":401,"error":"Unauthorized",
                                  "message":"Autenticacion requerida o invalida","path":"%s"}
