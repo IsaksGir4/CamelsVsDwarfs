@@ -1,0 +1,1496 @@
+{
+  "info": {
+    "_postman_id": "7a7d9517-4978-4e7c-9b50-7efb58c02731",
+    "name": "Camel vs Dwarf Racing System API",
+    "description": "Coleccion completa de la API del proyecto Camel vs Dwarf Racing System (Implementacion e Integracion, Universidad EIA). Incluye autenticacion via Keycloak y todos los endpoints del backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:8180"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "token_organizer",
+      "value": ""
+    },
+    {
+      "key": "token_viewer",
+      "value": ""
+    },
+    {
+      "key": "playerId",
+      "value": ""
+    },
+    {
+      "key": "teamId",
+      "value": ""
+    },
+    {
+      "key": "raceId",
+      "value": ""
+    },
+    {
+      "key": "registrationId",
+      "value": ""
+    },
+    {
+      "key": "resultId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth (Keycloak)",
+      "item": [
+        {
+          "name": "Obtener token - admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{keycloak_url}}/realms/camelsvsdwarfs/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_url}}"
+              ],
+              "path": [
+                "realms",
+                "camelsvsdwarfs",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "camelsvsdwarfs-swagger"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "admin123"
+                }
+              ]
+            },
+            "description": "Obtiene un token para el usuario admin. El script de Tests guarda automaticamente el token en la variable de coleccion {{token}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('token', json.access_token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener token - organizer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{keycloak_url}}/realms/camelsvsdwarfs/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_url}}"
+              ],
+              "path": [
+                "realms",
+                "camelsvsdwarfs",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "camelsvsdwarfs-swagger"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "organizer"
+                },
+                {
+                  "key": "password",
+                  "value": "organizer123"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('token_organizer', json.access_token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener token - viewer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{keycloak_url}}/realms/camelsvsdwarfs/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak_url}}"
+              ],
+              "path": [
+                "realms",
+                "camelsvsdwarfs",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "camelsvsdwarfs-swagger"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "viewer"
+                },
+                {
+                  "key": "password",
+                  "value": "viewer123"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('token_viewer', json.access_token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/auth/profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            },
+            "description": "Perfil del usuario autenticado, sincronizado automaticamente desde Keycloak."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Players",
+      "item": [
+        {
+          "name": "Crear competidor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players"
+              ]
+            },
+            "description": "Solo ADMIN.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Byte Amel\",\n  \"nickname\": \"ByteTheCamel\",\n  \"playerType\": \"CAMEL\",\n  \"birthDate\": \"2018-05-10\",\n  \"height\": 2.1,\n  \"weight\": 450.0,\n  \"placeOfBirth\": \"Alto de las Palmas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar competidores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Buscar competidor por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players/{{playerId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players",
+                "{{playerId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Actualizar competidor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players/{{playerId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players",
+                "{{playerId}}"
+              ]
+            },
+            "description": "Solo ADMIN.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Byte Amel\",\n  \"nickname\": \"ByteTheCamel\",\n  \"playerType\": \"CAMEL\",\n  \"birthDate\": \"2018-05-10\",\n  \"height\": 2.1,\n  \"weight\": 450.0,\n  \"placeOfBirth\": \"Alto de las Palmas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado del competidor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players/{{playerId}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players",
+                "{{playerId}}",
+                "status"
+              ]
+            },
+            "description": "Solo ADMIN.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newState\": \"INJURED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar competidor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players/{{playerId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players",
+                "{{playerId}}"
+              ]
+            },
+            "description": "Solo ADMIN. Falla con 409 si el competidor ya tiene carreras completadas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "Crear equipo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams"
+              ]
+            },
+            "description": "Solo ADMIN.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamName\": \"The Five Exceptions\",\n  \"description\": \"Equipo de enanos\",\n  \"responsableCoach\": \"Mr. Abandonado\",\n  \"category\": \"QUARTET\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar equipos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Buscar equipo por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams/{{teamId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "{{teamId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Actualizar equipo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams/{{teamId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "{{teamId}}"
+              ]
+            },
+            "description": "Solo ADMIN.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamName\": \"The Five Exceptions\",\n  \"description\": \"Equipo de enanos\",\n  \"responsableCoach\": \"Mr. Abandonado\",\n  \"category\": \"QUARTET\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado del equipo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams/{{teamId}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "{{teamId}}",
+                "status"
+              ]
+            },
+            "description": "Solo ADMIN.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newStatus\": \"INACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar equipo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams/{{teamId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "{{teamId}}"
+              ]
+            },
+            "description": "Solo ADMIN."
+          }
+        },
+        {
+          "name": "Listar miembros activos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams/{{teamId}}/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "{{teamId}}",
+                "members"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Agregar miembro al equipo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams/{{teamId}}/members/{{playerId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "{{teamId}}",
+                "members",
+                "{{playerId}}"
+              ]
+            },
+            "description": "Solo ADMIN."
+          }
+        },
+        {
+          "name": "Quitar miembro del equipo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/teams/{{teamId}}/members/{{playerId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "teams",
+                "{{teamId}}",
+                "members",
+                "{{playerId}}"
+              ]
+            },
+            "description": "Solo ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Races",
+      "item": [
+        {
+          "name": "Crear carrera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"raceName\": \"Carrera de prueba\",\n  \"description\": \"Carrera de ejemplo para pruebas\",\n  \"programationDate\": \"2026-12-01\",\n  \"programationHour\": \"09:00:00\",\n  \"ubicationStart\": \"Alto de las Palmas\",\n  \"ubicationFinish\": \"Envigado\",\n  \"distanceMeters\": 1000,\n  \"maxPlayers\": 4,\n  \"raceType\": \"INDIVIDUAL\",\n  \"registrationDeadline\": \"2026-11-25\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar carreras",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Buscar carrera por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Actualizar carrera",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"raceName\": \"Carrera de prueba\",\n  \"description\": \"Carrera de ejemplo para pruebas\",\n  \"programationDate\": \"2026-12-01\",\n  \"programationHour\": \"09:00:00\",\n  \"ubicationStart\": \"Alto de las Palmas\",\n  \"ubicationFinish\": \"Envigado\",\n  \"distanceMeters\": 1000,\n  \"maxPlayers\": 4,\n  \"raceType\": \"INDIVIDUAL\",\n  \"registrationDeadline\": \"2026-11-25\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado de la carrera",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}",
+                "status"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newStatus\": \"OPEN_FOR_REGISTRATION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar carrera",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registrations",
+      "item": [
+        {
+          "name": "Registrar participante en carrera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}/registrations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}",
+                "registrations"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"teamId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar registros de una carrera",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}/registrations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}",
+                "registrations"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Buscar registro por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/registrations/{{registrationId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "registrations",
+                "{{registrationId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Aprobar registro",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/registrations/{{registrationId}}/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "registrations",
+                "{{registrationId}}",
+                "approve"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER."
+          }
+        },
+        {
+          "name": "Rechazar registro",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/registrations/{{registrationId}}/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "registrations",
+                "{{registrationId}}",
+                "reject"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Cupo lleno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cancelar registro",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/registrations/{{registrationId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "registrations",
+                "{{registrationId}}"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Results & Standings",
+      "item": [
+        {
+          "name": "Registrar resultado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}/results",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}",
+                "results"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"teamId\": null,\n  \"startPosition\": 1,\n  \"endPosition\": 1,\n  \"totalTimeMs\": 120000,\n  \"statusResult\": \"FINISHED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar resultados de una carrera",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races/{{raceId}}/results",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races",
+                "{{raceId}}",
+                "results"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Buscar resultado por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/results/{{resultId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "results",
+                "{{resultId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Actualizar resultado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/results/{{resultId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "results",
+                "{{resultId}}"
+              ]
+            },
+            "description": "ADMIN u ORGANIZER.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endPosition\": 2,\n  \"statusResult\": \"FINISHED\",\n  \"totalTimeMs\": 125000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Standings generales",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/standings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "standings"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Standings de competidores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/standings/competitors",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "standings",
+                "competitors"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Standings de equipos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/standings/teams",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "standings",
+                "teams"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Log",
+      "item": [
+        {
+          "name": "Listar audit log",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/audit?page=0&size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "audit"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Solo ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ejemplos de errores (400/401/403/404/409)",
+      "item": [
+        {
+          "name": "400 - Body invalido (campos faltantes)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Body sin los campos obligatorios -> 400 Bad Request con detalle de validacion por campo."
+          }
+        },
+        {
+          "name": "401 - Sin token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/players",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players"
+              ]
+            },
+            "description": "Sin header Authorization -> 401 Unauthorized (respuesta JSON estructurada)."
+          }
+        },
+        {
+          "name": "403 - Rol insuficiente (viewer crea carrera)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_viewer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/races",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "races"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"raceName\": \"Carrera de prueba\",\n  \"description\": \"Carrera de ejemplo para pruebas\",\n  \"programationDate\": \"2026-12-01\",\n  \"programationHour\": \"09:00:00\",\n  \"ubicationStart\": \"Alto de las Palmas\",\n  \"ubicationFinish\": \"Envigado\",\n  \"distanceMeters\": 1000,\n  \"maxPlayers\": 4,\n  \"raceType\": \"INDIVIDUAL\",\n  \"registrationDeadline\": \"2026-11-25\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Ejecutar primero 'Obtener token - viewer' en la carpeta Auth. Un VIEWER no puede crear carreras -> 403 Forbidden."
+          }
+        },
+        {
+          "name": "404 - Recurso inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            },
+            "description": "UUID valido pero que no existe -> 404 Not Found."
+          }
+        },
+        {
+          "name": "409 - Conflicto (nickname duplicado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/players",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "players"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Byte Amel\",\n  \"nickname\": \"ByteTheCamel\",\n  \"playerType\": \"CAMEL\",\n  \"birthDate\": \"2018-05-10\",\n  \"height\": 2.1,\n  \"weight\": 450.0,\n  \"placeOfBirth\": \"Alto de las Palmas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Ejecutar dos veces seguidas con el mismo nickname -> la segunda vez responde 409 Conflict (nickname ya existe)."
+          }
+        }
+      ]
+    }
+  ]
+}
