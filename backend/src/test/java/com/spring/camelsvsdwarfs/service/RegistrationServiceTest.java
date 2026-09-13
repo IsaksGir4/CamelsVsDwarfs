@@ -33,6 +33,7 @@ class RegistrationServiceTest {
     @Mock private TeamRepository teamRepository;
     @Mock private TeamMemberRepository teamMemberRepository;
     @Mock private UserSyncService userSyncService;
+    @Mock private AuditService auditService;
 
     @InjectMocks
     private RegistrationService registrationService;

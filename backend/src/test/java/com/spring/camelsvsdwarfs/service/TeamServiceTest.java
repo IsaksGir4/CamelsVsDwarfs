@@ -45,6 +45,9 @@ class TeamServiceTest {
     @Mock
     private StandingResultRepository standingResultRepository;
 
+    @Mock
+    private AuditService auditService;
+
     @InjectMocks
     private TeamService teamService;
 
