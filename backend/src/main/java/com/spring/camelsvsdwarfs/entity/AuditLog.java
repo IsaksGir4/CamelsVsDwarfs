@@ -6,6 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,30 +20,33 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="audit_logs")
+@Table(name = "audit_logs")
 public class AuditLog {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idAuditLog;
 
-    @Column(name = "id_user")
-    private UUID idUser;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_user")
+    private User user;
 
     @Column(nullable = false)
     private String action;
 
+    @Column(columnDefinition = "TEXT")
     private String entityType;
 
     @Column(nullable = false)
-    private String entityId;
+    private UUID entityId;
 
-    @Column(length = 512)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 512)
+    @Column(columnDefinition = "TEXT")
     private String oldValue;
 
-    @Column(length = 512)
+    @Column(columnDefinition = "TEXT")
     private String newValue;
 
     @Builder.Default

@@ -1,16 +1,21 @@
 spring:
   application:
-    name: enanosvscamellos
-
+    name: camelsvsdwarfs
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/enanosdb
-    username: enanosuser
-    password: enanospassword
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:camelsvsdwarfsdb}
+    username: ${DB_USERNAME:camelsvsdwarfsuser}
+    password: ${DB_PASSWORD:changeme}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
-
     show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8180/realms/camelsvsdwarfs/protocol/openid-connect/certs}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/camelsvsdwarfs}

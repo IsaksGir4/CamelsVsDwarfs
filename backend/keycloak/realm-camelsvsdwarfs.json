@@ -1,0 +1,80 @@
+{
+  "realm": "camelsvsdwarfs",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "accessTokenLifespan": 1800,
+  "ssoSessionIdleTimeout": 3600,
+  "roles": {
+    "realm": [
+      { "name": "admin", "description": "Manages users, competitors, teams, races, registrations, results and audit records" },
+      { "name": "organizer", "description": "Manages races, registrations and results; views competitors and teams" },
+      { "name": "viewer", "description": "Read-only: public info, schedules, results and standings" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "camelsvsdwarfs-swagger",
+      "name": "CamelsVsDwarfs (Swagger)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:8080/*"],
+      "webOrigins": ["http://localhost:8080"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "defaultClientScopes": ["web-origins", "profile", "roles", "email", "basic"]
+    },
+    {
+      "clientId": "camelsvsdwarfs-frontend",
+      "name": "CamelsVsDwarfs (Frontend)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "defaultClientScopes": ["web-origins", "profile", "roles", "email", "basic"]
+    }
+  ],
+  "users": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Byte",
+      "lastName": "Admin",
+      "email": "admin@camelsvsdwarfs.test",
+      "credentials": [{ "type": "password", "value": "admin123", "temporary": false }],
+      "realmRoles": ["admin"]
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "username": "organizer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Race",
+      "lastName": "Organizer",
+      "email": "organizer@camelsvsdwarfs.test",
+      "credentials": [{ "type": "password", "value": "organizer123", "temporary": false }],
+      "realmRoles": ["organizer"]
+    },
+    {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "username": "viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Tiny",
+      "lastName": "Viewer",
+      "email": "viewer@camelsvsdwarfs.test",
+      "credentials": [{ "type": "password", "value": "viewer123", "temporary": false }],
+      "realmRoles": ["viewer"]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import com.spring.camelsvsdwarfs.exception.ConflictException;
 import com.spring.camelsvsdwarfs.exception.ResourceNotFoundException;
 import com.spring.camelsvsdwarfs.repository.PlayerRepository;
 import com.spring.camelsvsdwarfs.repository.specification.PlayerSpecification;
+import com.spring.camelsvsdwarfs.repository.StandingResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,10 @@ import java.util.UUID;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final StandingResultRepository standingResultRepository;
+    private final AuditService auditService;
 
+    @Transactional
     public PlayerResponseDTO create(PlayerCreateDTO dto){
         if (playerRepository.existsByNickname(dto.nickname())) {
             throw new ConflictException("Ya existe un competidor con el nickname '" + dto.nickname() + "'");
@@ -48,6 +52,10 @@ public class PlayerService {
                 .build();
 
         Player saved = playerRepository.save(player);
+
+        auditService.log("CREATE", "Player", saved.getIdPlayer(),
+                "Competidor creado: " + saved.getName() + " (" + saved.getNickname() + ")");
+
         return toResponseDTO(saved);
     }
 
@@ -74,7 +82,7 @@ public class PlayerService {
 
         //Si se cambia el nickname, se valida que el nuevo no choque con otro jugador
         if (!player.getNickname().equals(dto.nickname())
-        && playerRepository.existsByNickname(dto.nickname())){
+                && playerRepository.existsByNickname(dto.nickname())){
             throw  new ConflictException("Ya existe un competidor con el nickname '" + dto.nickname() + "'");
         }
 
@@ -87,6 +95,10 @@ public class PlayerService {
         player.setPlaceOfBirth(dto.placeOfBirth());
 
         Player updated = playerRepository.save(player);
+
+        auditService.log("UPDATE", "Player", updated.getIdPlayer(),
+                "Competidor actualizado: " + updated.getNickname());
+
         return toResponseDTO(updated);
     }
 
@@ -95,34 +107,33 @@ public class PlayerService {
         Player player = findEntityById(id);
         PlayerState current = player.getActualState();
         PlayerState next = dto.newState();
-
         if (current == next) {
             throw new ConflictException("El competidor ya se encuentra en estado " + next);
         }
         player.setActualState(next);
 
         Player updated = playerRepository.save(player);
+
+        auditService.log("STATUS_CHANGE", "Player", updated.getIdPlayer(),
+                "Cambio de estado del competidor " + updated.getNickname(),
+                String.valueOf(current), String.valueOf(next));
+
         return toResponseDTO(updated);
     }
 
+    @Transactional
     public void delete(UUID id){
         Player player = findEntityById(id);
 
-        // TODO(feature/results): Esta validación es un PROXY temporal mientras no existe
-        // StandingResultRepository (se construye en feature/results). Lo correcto según
-        // la rúbrica es verificar existencia real de resultados oficiales asociados a
-        // este competidor: standingResultRepository.existsByPlayerId(id).
-        // Reemplazar esta condición apenas se integre esa branch a develop, para no
-        // dejar borrar físicamente un competidor con carreras completadas pero
-        // registradas incorrectamente en racesCompleted (ej. por bug o dato manual).
-        if (player.getRacesCompleted() != null && player.getRacesCompleted() > 0){
+        if (standingResultRepository.existsByPlayer_IdPlayer(id)) {
             throw new ConflictException(
-                    "No se puede eliminar un competidor con carreras oficiales registradas. " +
-                    "Debe ser retirado (RETIRED) en su lugar."
-            );
+                    "No se puede eliminar un competidor con resultados oficiales registrados. " +
+                            "Debe ser retirado (RETIRED) en su lugar.");
         }
-        playerRepository.delete(player);
+        auditService.log("DELETE", "Player", id,
+                "Competidor eliminado: " + player.getNickname());
 
+        playerRepository.delete(player);
     }
 
     private Player findEntityById(UUID id){

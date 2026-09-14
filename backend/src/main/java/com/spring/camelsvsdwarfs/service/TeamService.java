@@ -8,6 +8,7 @@ import com.spring.camelsvsdwarfs.repository.PlayerRepository;
 import com.spring.camelsvsdwarfs.repository.TeamMemberRepository;
 import com.spring.camelsvsdwarfs.repository.TeamRepository;
 import com.spring.camelsvsdwarfs.repository.specification.TeamSpecification;
+import com.spring.camelsvsdwarfs.repository.StandingResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,8 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final PlayerRepository playerRepository;
+    private final StandingResultRepository standingResultRepository;
+    private final AuditService auditService;
 
     @Transactional
     public TeamResponseDTO create(TeamCreateDTO dto) {
@@ -45,6 +48,10 @@ public class TeamService {
                 .build();
 
         Team saved = teamRepository.save(team);
+
+        auditService.log("CREATE", "Team", saved.getIdTeam(),
+                "Equipo creado: " + saved.getTeamName());
+
         return toResponseDTO(saved);
     }
 
@@ -88,6 +95,10 @@ public class TeamService {
         team.setCategory(dto.category());
 
         Team updated = teamRepository.save(team);
+
+        auditService.log("UPDATE", "Team", updated.getIdTeam(),
+                "Equipo actualizado: " + updated.getTeamName());
+
         return toResponseDTO(updated);
     }
 
@@ -99,8 +110,14 @@ public class TeamService {
             throw new ConflictException("El equipo ya se encuentra en estado " + dto.newState());
         }
 
+        TeamStatus previous = team.getStatus();
         team.setStatus(dto.newState());
         Team updated = teamRepository.save(team);
+
+        auditService.log("STATUS_CHANGE", "Team", updated.getIdTeam(),
+                "Cambio de estado del equipo " + updated.getTeamName(),
+                String.valueOf(previous), String.valueOf(dto.newState()));
+
         return toResponseDTO(updated);
     }
 
@@ -108,13 +125,14 @@ public class TeamService {
     public void delete(UUID id) {
         Team team = findEntityById(id);
 
-        // TODO(feature/results): proxy temporal mientras no existe StandingResultRepository.
-        if ((team.getVictories() != null && team.getVictories() > 0)
-                || (team.getDefeats() != null && team.getDefeats() > 0)) {
+        if (standingResultRepository.existsByTeam_IdTeam(id)) {
             throw new ConflictException(
-                    "No se puede eliminar un equipo con historial de carreras. " +
+                    "No se puede eliminar un equipo con resultados oficiales registrados. " +
                             "Debe ser desactivado (INACTIVE) en su lugar.");
         }
+
+        auditService.log("DELETE", "Team", id,
+                "Equipo eliminado: " + team.getTeamName());
 
         teamRepository.delete(team);
     }
@@ -162,6 +180,10 @@ public class TeamService {
                 .build();
 
         TeamMember saved = teamMemberRepository.save(member);
+
+        auditService.log("ADD_MEMBER", "TeamMember", saved.getIdTeamMember(),
+                player.getNickname() + " se unio al equipo " + team.getTeamName());
+
         return toMemberResponseDTO(saved);
     }
 
@@ -180,6 +202,10 @@ public class TeamService {
         member.setStatus(TeamMemberStatus.INACTIVE);
         member.setLeaveDate(LocalDate.now());
         teamMemberRepository.save(member);
+
+        auditService.log("REMOVE_MEMBER", "TeamMember", member.getIdTeamMember(),
+                member.getPlayer().getNickname() + " salio del equipo "
+                        + member.getTeam().getTeamName());
     }
 
     @Transactional(readOnly = true)

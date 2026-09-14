@@ -1,12 +1,119 @@
-spring:
-  application:
-    name: camelsvsdwarfs
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:camelsvsdwarfsdb}
-    username: ${DB_USERNAME:camelsvsdwarfsuser}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+name: camelsvsdwarfs
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # El navegador corre en la maquina anfitriona, fuera de la red de Docker,
+        # asi que estas URLs deben ser las publicas (localhost), no los nombres
+        # de servicio. Vite las incrusta en el bundle durante el build.
+        VITE_API_BASE_URL: http://localhost:8080/api
+        VITE_KEYCLOAK_URL: http://localhost:${KEYCLOAK_PORT:-8180}
+        VITE_KEYCLOAK_REALM: camelsvsdwarfs
+        VITE_KEYCLOAK_CLIENT_ID: camelsvsdwarfs-frontend
+    image: camelsvsdwarfs-frontend:latest
+    pull_policy: build
+    container_name: camelsvsdwarfs-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - camelsvsdwarfs-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: camelsvsdwarfs-app:latest
+    pull_policy: build
+    container_name: camelsvsdwarfs-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - KEYCLOAK_JWKS_URI=http://keycloak:8080/realms/camelsvsdwarfs/protocol/openid-connect/certs
+      - KEYCLOAK_ISSUER_URI=http://localhost:${KEYCLOAK_PORT:-8180}/realms/camelsvsdwarfs
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+    networks:
+      - camelsvsdwarfs-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: camelsvsdwarfs-keycloak
+    restart: unless-stopped
+    command: ["start-dev", "--import-realm"]
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN_USER}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME=http://localhost:${KEYCLOAK_PORT:-8180}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    volumes:
+      - ./backend/keycloak:/opt/keycloak/data/import:ro
+    networks:
+      - camelsvsdwarfs-network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '\"status\": \"UP\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  db:
+    image: postgres:15-alpine
+    container_name: camelsvsdwarfs-db
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - camelsvsdwarfs-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  camelsvsdwarfs-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -12,7 +12,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "team_members")
+@Table(name = "team_members", indexes = {
+        @Index(name = "idx_member_team_status", columnList = "id_team, status"),
+        @Index(name = "idx_member_player_status", columnList = "id_player, status")
+})
 public class TeamMember {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
